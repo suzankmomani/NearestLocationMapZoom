@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -108,6 +111,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    private void showGrantPermissionScreen() {
+        final LinearLayout grantPermissionScreen = (LinearLayout) findViewById(R.id.grantPermissionScreen);
+        TextView showPermissionPopup = (TextView) findViewById(R.id.showPermissionPopup);
+
+        grantPermissionScreen.setVisibility(View.VISIBLE);
+        showPermissionPopup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startGoogleApiClient();
+
+            }
+        });
+    }
+
+    private void hideGrantPermissionScreen(){
+        final LinearLayout grantPermissionScreen = (LinearLayout) findViewById(R.id.grantPermissionScreen);
+        grantPermissionScreen.setVisibility(View.GONE);
+    }
 
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions,
@@ -116,6 +137,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (grantResults.length == 1
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // We can now safely use the API we requested access to
+                hideGrantPermissionScreen();
                 startGoogleApiClient();
             } else {
                 // Permission was denied or request was cancelled
@@ -131,7 +153,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                 ACCESS_FINE_LOCATION);
                     }
+                    showGrantPermissionScreen();
                 } else {
+                    hideGrantPermissionScreen();
                     startGoogleApiClient();
                 }
 
