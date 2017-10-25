@@ -233,8 +233,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         places.add(new MapLocation("Cafe 2", 30.62794534081762, 36.17052298039198));
         places.add(new MapLocation("Cafe 1", 31.660850015075493, 36.4123160764575));
         places.add(new MapLocation("Cafe 5", 32.31544321813735, 35.928798280656345));
-//        places.add(new MapLocation("Cafe 6", 37.41509908060492, -122.09613550454378));
-//        places.add(new MapLocation("Cafe 7", 37.385857958257915, -122.08916913717985));
 
 
         return places;
