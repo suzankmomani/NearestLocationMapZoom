@@ -68,6 +68,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .build();
         }
         mGoogleApiClient.connect();
+
+
+        handleMyLocationButton();
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -107,7 +110,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             /*start location updates so if the user changed it's location update the map*/
             initLocationRequest();
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            if (mCurrentLocation == null)
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
     }
 
@@ -125,7 +129,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    private void hideGrantPermissionScreen(){
+    private void hideGrantPermissionScreen() {
         final LinearLayout grantPermissionScreen = (LinearLayout) findViewById(R.id.grantPermissionScreen);
         grantPermissionScreen.setVisibility(View.GONE);
     }
@@ -169,7 +173,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         startGoogleApiClient();
 
-        handleMyLocationButton();
 
         drawPlacesMarkersOnMap();
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
@@ -182,20 +185,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void handleMyLocationButton() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mMap.setMyLocationEnabled(true);
-        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
-            @Override
-            public boolean onMyLocationButtonClick() {
-                LatLng ll = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-                CameraUpdate update = CameraUpdateFactory.newLatLngZoom(ll, 20);
-                mMap.animateCamera(update);
-
-                return true;
+        if (mMap != null) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
             }
-        });
+            mMap.setMyLocationEnabled(true);
+            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+                @Override
+                public boolean onMyLocationButtonClick() {
+                    LatLng ll = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+                    CameraUpdate update = CameraUpdateFactory.newLatLngZoom(ll, 20);
+                    mMap.animateCamera(update);
+
+                    return true;
+                }
+            });
+        }
     }
 
     private LatLng getNearestMarker() {
@@ -223,13 +228,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<MapLocation> getPlacesList() {
         ArrayList<MapLocation> places = new ArrayList<MapLocation>();
 
-        places.add(new MapLocation("Cafe 4", 37.455791146354656, -122.09789671003819));
-        places.add(new MapLocation("Cafe 3", 37.43229574153913, -122.07981728017332));
-        places.add(new MapLocation("Cafe 2", 37.35790568156412, -122.02220343053342));
-        places.add(new MapLocation("Cafe 1", 37.42452851073246, -122.08032254129647));
-        places.add(new MapLocation("Cafe 5", 37.416032969886054, -122.08087205886841));
-        places.add(new MapLocation("Cafe 6", 37.41509908060492, -122.09613550454378));
-        places.add(new MapLocation("Cafe 7", 37.385857958257915, -122.08916913717985));
+        places.add(new MapLocation("Cafe 4", 32.886613739467826, 43.894992247223854));
+        places.add(new MapLocation("Cafe 3", 22.87299280926598, 43.77114996314049));
+        places.add(new MapLocation("Cafe 2", 30.62794534081762, 36.17052298039198));
+        places.add(new MapLocation("Cafe 1", 31.660850015075493, 36.4123160764575));
+        places.add(new MapLocation("Cafe 5", 32.31544321813735, 35.928798280656345));
+//        places.add(new MapLocation("Cafe 6", 37.41509908060492, -122.09613550454378));
+//        places.add(new MapLocation("Cafe 7", 37.385857958257915, -122.08916913717985));
 
 
         return places;
@@ -237,12 +242,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-
-        //remove previous current location marker and add new one at current position
-        if (mCurrentLocation != null) {
-            myMarker.remove();
+        if (mCurrentLocation == null) {
+            //remove previous current location marker and add new one at current position
+            if (mCurrentLocation != null) {
+                myMarker.remove();
+            }
+            updateMapUI();
         }
-        updateMapUI();
     }
 
     private void updateMapUI() {
@@ -262,7 +268,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         builder.include(getNearestMarker());
         builder.include(myLoc);
         LatLngBounds bounds = builder.build();
-
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 150);
         mMap.animateCamera(cu);
     }
